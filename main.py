@@ -15,9 +15,8 @@ status_list = [
     ]
 
 ###################### parsering ###################################
-parser = argparse.ArgumentParser(description='Task Tracker')
-parser.add_argument('data', type=str,help='[action] [id or description] [sub-action]',nargs='*')
-args = parser.parse_args()
+
+
 
 def add(id,description,pev_data:dict):
     time_now = datetime.now()
@@ -29,23 +28,34 @@ def add(id,description,pev_data:dict):
 
 
 def searchList(args,pev_data:dict):
+    final_string = SEARCH_TITLE
+
     try:
         condition=args.data[1]
+        
         if condition in status_list:
-            print("| ID |  STATUS   |    CREATEDAT    |    UPDATEDAT    |    DESCRIPTION    |")                
+            
             for key,entry in pev_data.items():
+                
                 if entry['status'] == condition:
-                    print(f"|{key}|{entry['status']}|{entry['createdAt']}|{entry['updatedAt']}|{entry['description']}|")
+                    final_string+=search_data(key,entry)
+            return final_string
+        
         else:
             return f"please select only in this status: \n{status_list}"
+    
     except IndexError:
-        print("| ID |  STATUS   |    CREATEDAT    |    UPDATEDAT    |    DESCRIPTION    |")                
+        
         for key,entry in pev_data.items():
-            print(f"|{key}|{entry['status']}|{entry['createdAt']}|{entry['updatedAt']}|{entry['description']}|")
+            final_string+=search_data(key,entry)
+            return final_string
+        
     except Exception as e:
         return e
+
 def delete(id,pev_data):
     del pev_data[id]
+    
     return f"Task successfully deleted (ID: {id})"
 
 def update(id,description,pev_data:dict):
@@ -107,12 +117,12 @@ def main(args,pev_data:dict):
         
         else:
             message="For help please use -h"
+        
         writeData(pev_data)
-        print(message)
-
+        return message
+    
     except Exception as e:
-        print(e)
-        return None
+        return e
  
 
 def writeData(entry):
@@ -131,13 +141,16 @@ def readData():
             task_data=json.load(fp=file)
         return task_data
     except Exception as e:
-        print("No data")
+        print("No data -- create data file")
         return task_data
 
 
-
-pev_data = readData()
-output = main(args,pev_data)
-
+if __name__ == "__main__": 
+    parser = argparse.ArgumentParser(description='Task Tracker')
+    parser.add_argument('data', type=str,help='[action] [id or description] [sub-action]',nargs='*')
+    args = parser.parse_args()
+    pev_data = readData()
+    output = main(args,pev_data)
+    print(output)
 
 
